@@ -1,0 +1,11 @@
+node_modules/
+data/
+etc/
+.DS_Store
+.env
+.env.docker
+.vscode
+etc/
+todo
+*.log
+*.zip
