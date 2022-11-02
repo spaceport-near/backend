@@ -84,7 +84,7 @@ export class AccountDataAccess {
   }
 
   async read(conditions, projection = null, options = null) {
-    // Deep flattern conditions while don't appears primitive, or key startWith '$'
+    // Make flat conditions while don't appears primitive, or key startWith '$'
     const flatConditions = this.#makeFlat(conditions, (subObj, key) => key.startsWith('$'));
     return await this.#model.find(flatConditions, projection, options);
   }
@@ -95,7 +95,7 @@ export class AccountDataAccess {
 
   async updateOne(params, data, options = {}) {
     options.runValidators = true;
-    // Deep flattern update data while don't appears primitive, or key startWith '$'
+    // Make flat update data while don't appears primitive, or key startWith '$'
     const flatUpdateData = this.#makeFlat(data, (subObj, key) => key.startsWith('$'));
     const mongooResponse = await this.#model.updateOne(params, flatUpdateData, options);
     return !!(mongooResponse && mongooResponse.n && mongooResponse.ok);
