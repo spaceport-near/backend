@@ -1,0 +1,6 @@
+Language: JavaScript(Node.js)
+DataBase: MongoDb(Mongoose ODM)
+Web application framework: Express
+Near communication: near-api-js
+Auth:  Google Auth
+Version control: Git
