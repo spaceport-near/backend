@@ -23,4 +23,4 @@ Spaceport application docking/undocking service backend
 - start container
 
 ## License
-MIT
+This project is licensed under the terms of the MIT license.
