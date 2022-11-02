@@ -1,0 +1,293 @@
+openapi: 3.0.0
+
+#region : info
+info:
+  version: 0.1.0
+  title: Spaceport application docking/undocking service API
+  description: Spaceport application docking/undocking service API
+#endregion : info
+
+security:
+  - BearerAuth: []
+
+#region : paths
+paths:
+  #region : accounts
+  /accounts/{accountId}:
+    parameters:
+      - name: accountId
+        in: path
+        required: true
+        description: accountId from Account model schema
+        schema:
+          type: string
+
+    get:
+      description: Obtain account info
+      responses:
+        200:
+          description: Specified by accountId account info
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        400:
+          $ref: "#/components/responses/InvalidInputs"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    put:
+      description: Update information about account
+      requestBody:
+        required: true
+        description: Properties to be updated
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Account"
+      responses:
+        501:
+          $ref: "#/components/responses/NotImplemented"
+
+    delete:
+      description: Init undocking and eventually delete account entity
+      responses:
+        200:
+          description: Successfully init undocking
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        404:
+          $ref: "#/components/responses/NotFound"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+  /accounts:
+    get:
+      description: Obtain list of account
+      parameters:
+        - name: conditions
+          in: query
+          description: stringified and encoded query conditions, according to Account schema, encodeURIComponent(JSON.stringify(conditions) 
+          schema:
+            type: string
+        - name: options
+          in: query
+          description: stringified and encoded query options, according to QueryOptions schema, encodeURIComponent(JSON.stringify(options)
+          schema:
+            type: string
+      responses:
+        200:
+          description: List of accounts. If no items found returns empty array
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/DataPageBaseResponse'
+                  - type: object
+                    properties:
+                      data: 
+                        $ref: "#/components/schemas/AccountList"
+        400:
+          $ref: "#/components/responses/InvalidInputs"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+
+    post:
+      description: Dock account(create account and make required manipulations with account keys)
+      requestBody:
+        required: true
+        description: Properties required to dock and create account
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountRawData"
+      responses:
+        201:
+          description: Successfully created a account
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        400:
+          $ref: "#/components/responses/InvalidInputs"
+        401:
+          $ref: "#/components/responses/Unauthorized"
+        500:
+          $ref: "#/components/responses/InternalServerError"
+  #endregion : accounts
+#endregion : paths
+
+#region : components
+components:
+  #region : securitySchemes
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  #endregion : securitySchemes
+
+  #region : responses
+  responses:
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    InvalidInputs:
+      description: Input data not valid for this request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+    NotImplemented:
+      description: Not Implemented endpoint
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  #endregion : responses
+
+  #region : schemas
+  schemas:
+    Error:
+      description: Response errors template
+      properties:
+        code:
+          type: number
+          example: 401
+        message:
+          type: string
+          example: Unauthorized
+
+    AccountRawData:
+      description: Account input data to start docking process
+      properties:
+        seedPhrase:
+          type: string
+          description: account recovery seed phrase from NEAR blockchain
+        userId:
+          type: string
+          description: unique identifier from google auth
+
+    Account:
+      description: Account component data model
+      properties:
+        accountId:
+          type: string
+          description: unique account identifier from NEAR blockchain
+        userId:
+          type: string
+          description: unique identifier from google auth
+        seedKey:
+          description: created while docking NEAR account key descriptor, that should be delivered to user while undocking
+          type: object
+          properties:
+            private:
+              description: private key
+              type: string
+            public:
+              description: public key
+              type: string
+            seed:
+              description: key seed phrase
+              type: string
+            isDeleted:
+              description: flag that indicate is key was deleted while undocking
+              type: boolean
+        backupKey:
+          description: created while docking NEAR account key descriptor, that should be used as backup key while undocking, in case of user lost seedKey
+          type: object
+          properties:
+            private:
+              description: private key
+              type: string
+            public:
+              description: public key
+              type: string
+            seed:
+              description: key seed phrase
+              type: string
+            isDeleted:
+              description: flag that indicate is key was deleted while undocking
+              type: boolean
+        state:
+          description: account current state realted to docking/undocking process
+          type: string
+          enum: ['docking', 'docked', 'undocking:init', 'undocking:seedused', 'undocked']
+    
+    AccountList:
+      description: List of accounts
+      type: array
+      items:
+        $ref: "#/components/schemas/Account"
+    
+    DataPageBaseResponse:
+      description: data page base response, each endpoint add its own 'data' property
+      properties:
+        totalItems: 
+          description: total number of suitable for query items
+          type: integer
+        page: 
+          description: current page descriptor
+          properties:
+            index:
+              description: current page number
+              type: integer
+            size:
+              description: number of items current page contained
+              type: integer
+            sort: 
+              description: response data sorting options
+              properties:
+                property:
+                  description: property, the results has to be sorted by
+                  type: string
+                direction: 
+                  description: sort direction, (1) - from smallest to largest, (-1) - from largest to smallest
+                  type: integer
+                  enum: [1, -1]
+
+    QueryOptions:
+      description: query options, to configure query response
+      properties:
+        page:
+          properties:
+            index:
+              description: page number(index), started from 0
+              type: integer
+            size:
+              description: number of items per page
+              type: integer
+            sort:
+              description: response data sorting options
+              properties:
+                property:
+                  description: property, the results has to be sorted by
+                  type: string
+                direction: 
+                  description: sort direction, (1) - from smallest to largest, (-1) - from largest to smallest
+                  type: integer
+                  enum: [1, -1]
+
+  #endregion : schemas
+#endregion : components
