@@ -7,6 +7,7 @@ import seedUtil from 'near-seed-phrase';
 import axios from 'axios';
 import mongoose from 'mongoose';
 import EventEmitter from 'events';
+import {OAuth2Client} from 'google-auth-library';
 
 import {WinstonLoggerFacade} from '../../libs/logger/index.js';
 import {AccountDataAccess, AccountService, AccountNetwork} from '../../components/account/index.js';
@@ -15,6 +16,9 @@ import {RequestInputsParser} from '../../libs/request-inputs-parser/index.js';
 import {DataPageComposer} from '../../libs/data-page-composer/index.js';
 import {NearAccountFacade} from '../../libs/near-account-facade/index.js';
 import {FlatDoc} from '../../libs/flat-doc/index.js';
+import {AuthenticationService, AuthenticationNetwork} from '../../libs/authentication/index.js';
+import {AuthorizationService, AuthorizationNetwork} from '../../libs/authorization/index.js';
+
 
 import config from '../../../config/index.js';
 
@@ -34,12 +38,18 @@ mongoose.connect(config.mongo.url, config.mongo.options);
 const accountDataAccess = new AccountDataAccess(mongoose, FlatDoc.makeFlat);
 const accountService = new AccountService(accountDataAccess, nearAccountFacade, DataPageComposer.composePageInfo);
 const accountNetwork = new AccountNetwork(accountService, HttpErrorBody.compose, RequestInputsParser);
-
 accountService.setEventEmitter(eventEmitter);
 eventEmitter.on(accountService.events.undockingInit, logger.info.bind(logger));
 eventEmitter.on(accountService.events.undockingSeedused, logger.info.bind(logger));
 eventEmitter.on(accountService.events.undocked, logger.info.bind(logger));
 eventEmitter.on(accountService.events.undockingError, logger.warn.bind(logger));
+
+const authClient = new OAuth2Client(config.auth.google.clientid);
+const authenticationService = AuthenticationService.instantiate(authClient);
+const authenticationNetwork = AuthenticationNetwork.instantiate(authenticationService, HttpErrorBody.compose);
+const authorizationService = AuthorizationService.instantiate();
+const authorizationNetwork = AuthorizationNetwork.instantiate(authorizationService, HttpErrorBody.compose);
+
 
 // ADD PRE MIDDLEWARES
 app.use((req, res, next) => {
@@ -56,6 +66,8 @@ app.use(cors(config.CORS.defaultCorsOptions));
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
 
+app.use(authenticationNetwork.onRetrieveUser.bind(authenticationNetwork));
+app.use(authorizationNetwork.onVerifyAccess.bind(authorizationNetwork));
 accountNetwork.registerRoutes(router);
 app.use('/api/1.0.0', router);
 
