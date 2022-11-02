@@ -22,7 +22,7 @@ export class AccountNetwork {
       const data = await this.#service.dock(req.body);
       return res.status(201).send(data);
     } catch (err) {
-      // FIXME: separate into different errors
+      // FIXME: separate into different errors, handle 400 Invalid Inputs
       res.status(500).send(this.#composeError(500, err.message));
       return next(err);
     }
@@ -49,7 +49,7 @@ export class AccountNetwork {
       const dataPage = await this.#service.get(req.query.conditions, req.query.options);
       return res.status(200).send(dataPage);
     } catch (err) {
-      // FIXME: separate into different errors
+      // FIXME: separate into different errors, handle 400 Invalid Inputs
       res.status(500).send(this.#composeError(500, err.message));
       return next(err);
     }
