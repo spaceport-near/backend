@@ -51,7 +51,7 @@ const authorizationService = AuthorizationService.instantiate();
 const authorizationNetwork = AuthorizationNetwork.instantiate(authorizationService, HttpErrorBody.compose);
 
 
-// ADD PRE MIDDLEWARES
+// add pre middlewares
 app.use((req, res, next) => {
   // Try get ip from cloudflare headers
   // then nginx headers(nginx.conf: proxy_set_header  X-Real-IP  $remote_addr;)
@@ -71,17 +71,17 @@ app.use(authorizationNetwork.onVerifyAccess.bind(authorizationNetwork));
 accountNetwork.registerRoutes(router);
 app.use('/api/1.0.0', router);
 
-// HANDLE UNKNOWN ROUTE
+// handle unknown route
 app.use((req, res, next) => {
   const err = new Error(`Cannot ${req.method} ${req.path}`);
   res.status(404).end();
   return next(err);
 });
 
-// HANDLE APP ERRORS
+// handle app errors
 app.use((err, req, res, next) => logger.warn(err.stack, req.requestOpts));
 
-// SET APP GLOBAL ERROR HANDLERS
+// set app global error handlers
 process
   .on('unhandledRejection', (reason, promise) => {
     logger.error(`Unhandled Rejection at: ${promise}, reason: ${reason}`);
