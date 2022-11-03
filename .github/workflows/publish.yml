@@ -1,0 +1,37 @@
+name: Build and publish a docker image
+
+on:
+  push:
+    branches:
+      - develop
+    tags:
+      - 'v*'
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/metadata-action@v3
+        id: meta_spaceport_backend
+        with:
+          images: ghcr.io/spaceport-near/backend
+
+      - uses: docker/build-push-action@v2
+        with:
+          push: true
+          tags: ${{ steps.meta_spaceport_backend.outputs.tags }}
+          labels: ${{ steps.meta_spaceport_backend.outputs.labels }}
