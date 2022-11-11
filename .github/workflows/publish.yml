@@ -17,20 +17,24 @@ jobs:
       packages: write
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - uses: docker/login-action@v1
+      - name: Login to github registry
+        uses: docker/login-action@v1
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: docker/metadata-action@v3
+      - name: Docker meta
+        uses: docker/metadata-action@v3
         id: meta_spaceport_backend
         with:
           images: ghcr.io/spaceport-near/backend
 
-      - uses: docker/build-push-action@v2
+      - name: Build and push
+        uses: docker/build-push-action@v2
         with:
           push: true
           tags: ${{ steps.meta_spaceport_backend.outputs.tags }}
