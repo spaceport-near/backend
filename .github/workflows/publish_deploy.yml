@@ -48,7 +48,7 @@ jobs:
       packages: write
 
     steps:
-      - Deploy image to cluster
+      - name: Deploy image to cluster
         uses: actions-hub/kubectl@v1.25.4
         env:
           KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
