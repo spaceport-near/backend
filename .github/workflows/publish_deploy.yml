@@ -1,4 +1,4 @@
-name: Build and publish a docker image
+name: Build, publish and deploy a docker image
 
 on:
   push:
@@ -39,3 +39,18 @@ jobs:
           push: true
           tags: ${{ steps.meta_spaceport_backend.outputs.tags }}
           labels: ${{ steps.meta_spaceport_backend.outputs.labels }}
+
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - Deploy image to cluster
+        uses: actions-hub/kubectl@v1.25.4
+        env:
+          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+        with:
+          args: rollout restart deployment/spaceport-backend-backend
