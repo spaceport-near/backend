@@ -35,8 +35,8 @@ export class AccountService {
     if (account.state !== 'docking') throw new Error(`Account can not be docked, account state: ${account.state}`);
     await this.#nearAccountClient.grantAccountAccess(account.accountId, account.seedKey.private);
     await this.#nearAccountClient.clearAccountKeys(account.accountId, [account.seedKey.public, account.backupKey.public]);
-    await this.#dataAccess.updateOne({accountId: data.accountId}, {state: 'docked'});
-    return await this.#dataAccess.readOne({accountId: data.accountId});
+    await this.#dataAccess.updateOne({accountId: account.accountId}, {state: 'docked'});
+    return await this.#dataAccess.readOne({accountId: account.accountId});
   }
 
   async add(data) {
