@@ -105,8 +105,7 @@ export class AccountService {
         await this.#dataAccess.deleteOne({accountId: account.accountId});
       }
     } catch (err) {
-      console.log(err);
-      this.eventEmitter?.emit(this.#events.undockingError, `undocking:error for account: ${account.accountId}`);
+      this.eventEmitter?.emit(this.#events.undockingError, `undocking:error for account: ${account.accountId} | ${err.message}`);
     }
   }
 
