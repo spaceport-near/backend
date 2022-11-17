@@ -3,20 +3,22 @@ export class AuthenticationService {
     return new AuthenticationService(authClient);
   }
 
+  #authClient;
+
   constructor(authClient) {
-    this._authClient = authClient;
+    this.#authClient = authClient;
   }
 
   async retrieveUserData(idToken) {
     try {
-      const ticket = idToken ? await this._authClient.verifyIdToken({idToken}) : null;
-      return this._composeUserData(ticket);
+      const ticket = idToken ? await this.#authClient.verifyIdToken({idToken}) : null;
+      return this.#composeUserData(ticket);
     } catch (err) {
       return {};
     }
   }
 
-  _composeUserData(ticket) {
+  #composeUserData(ticket) {
     return !ticket ? {} : {id: ticket.getUserId()};
   }
 }
