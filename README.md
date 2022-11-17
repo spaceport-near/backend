@@ -4,7 +4,7 @@ Spaceport application docking/undocking service backend
 ## startup application 
 
 ### prerequisites
-- sturtup mongodb instance
+- startup mongodb instance
 
 ### local run
 - create and configure .env file in root of project(for example see: .env.example)
