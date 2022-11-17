@@ -23,7 +23,7 @@ Spaceport application docking/undocking service backend
 - start container
 
 ## Usage
-To communicate with service use JSON API.([docs](https://github.com/spaceport-near/backend/blob/develop/docs/openapi.yaml))
+To communicate with service use JSON API([docs](https://github.com/spaceport-near/backend/blob/develop/docs/openapi.yaml))
 
 ## License
 This project is licensed under the terms of the MIT license.
