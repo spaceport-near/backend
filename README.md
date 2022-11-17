@@ -22,5 +22,8 @@ Spaceport application docking/undocking service backend
 - specify env vars for container(list of required vars get from .env.example)
 - start container
 
+## Usage
+To communicate with service use JSON API.([docs](https://github.com/spaceport-near/backend/blob/develop/docs/openapi.yaml))
+
 ## License
 This project is licensed under the terms of the MIT license.
