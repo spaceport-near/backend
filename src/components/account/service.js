@@ -55,8 +55,7 @@ export class AccountService {
   }
 
   async get(conditions, options) {
-    // FIXME: refactor
-    const dataPageOptions = this.#dataAccess.composeDataPageOptions(options.page);
+    const dataPageOptions = this.#composeDataPageOptions(options.page);
     const dataArray = await this.#dataAccess.read(conditions, null, dataPageOptions);
     const collectionTotalLength = await this.#dataAccess.countDocuments(conditions);
     return this.#pageDataComposer(dataArray, options.page, collectionTotalLength);
@@ -148,6 +147,21 @@ export class AccountService {
   async #removeKey(accountId, {private: privateKey, public: publicKey}) {
     await this.#nearAccountClient.grantAccountAccess(accountId, privateKey);
     await this.#nearAccountClient.deleteAccountKeys(accountId, [publicKey]);
+  }
+
+  #composeDataPageOptions(page, dataListMaxLength = 100) {
+    const defaultDirection = -1;
+    const property = page?.sort?.property ?? 'createdAt';
+    const direction = page?.sort?.direction ?? defaultDirection;
+    const pageIndex = Math.max(0, page?.index ?? 0);
+    const pageSize = Math.min(dataListMaxLength, page?.size ?? dataListMaxLength);
+    return {
+      sort: {
+        [property]: direction,
+      },
+      skip: pageIndex * pageSize,
+      limit: pageSize,
+    };
   }
   // #endregion : private methods
 }

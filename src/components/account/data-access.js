@@ -64,21 +64,6 @@ export class AccountDataAccess {
     return await this.#model.estimatedDocumentCount();
   }
 
-  composeDataPageOptions(page, dataListMaxLength = 100) {
-    const defaultDirection = -1;
-    const property = page?.sort?.property ?? 'createdAt';
-    const direction = page?.sort?.direction ?? defaultDirection;
-    const pageIndex = Math.max(0, page?.index ?? 0);
-    const pageSize = Math.min(dataListMaxLength, page?.size ?? dataListMaxLength);
-    return {
-      sort: {
-        [property]: direction,
-      },
-      skip: pageIndex * pageSize,
-      limit: pageSize,
-    };
-  }
-
   async create(data) {
     return await this.#model.create(data);
   }
