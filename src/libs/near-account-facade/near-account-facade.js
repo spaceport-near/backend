@@ -72,12 +72,18 @@ export class NearAccountFacade {
 
   async addAccountKeys(accountId, keys) {
     const account = await this.#getAccountEntity(accountId);
-    await Promise.all(keys.map((key) => account.addKey(key)));
+    // use sequential call of operations
+    // in case of huge amount of key parallel call could cause near-api-js error
+    for (const key of keys) await account.addKey(key);
+    // NOT RECOMMENDED: await Promise.all(keys.map((key) => account.addKey(key)));
   }
 
   async deleteAccountKeys(accountId, keys) {
     const account = await this.#getAccountEntity(accountId);
-    await Promise.all(keys.map((key) => account.deleteKey(key)));
+    // use sequential call of operations
+    // in case of huge amount of key parallel call could cause near-api-js error
+    for (const key of keys) await account.deleteKey(key);
+    // NOT RECOMMENDED: await Promise.all(keys.map((key) => account.deleteKey(key)));
   }
 
   async getAccountKeys(accountId) {
@@ -89,11 +95,11 @@ export class NearAccountFacade {
   async clearAccountKeys(accountId, exceptionKeys) {
     const account = await this.#getAccountEntity(accountId);
     const keys = await account.getAccessKeys();
-    await Promise.all(
-      keys
-        .filter((key) => !exceptionKeys.includes(key['public_key']))
-        .map((key) => account.deleteKey(key['public_key'])),
-    );
+    const keysToRemove = keys.filter((key) => !exceptionKeys.includes(key['public_key']));
+    // use sequential call of operations
+    // in case of huge amount of key parallel call could cause near-api-js error
+    for (const keyToRemove of keysToRemove) await account.deleteKey(keyToRemove['public_key']);
+    // NOT RECOMMENDED: await Promise.all(keysToRemove.map((key) => account.deleteKey(key['public_key'])));
   }
 
   async isAccountKeysAdded(accountId, prevKeys, diffNumber = 1, permission = 'FullAccess') {
