@@ -4,7 +4,7 @@ Spaceport application docking/undocking service backend
 ## startup application 
 
 ### prerequisites
-- startup mongodb instance
+- startup MongoDb instance ([local](https://www.mongodb.com/docs/manual/installation/) or [cloud](https://www.mongodb.com/cloud/atlas/lp/try4))
 
 ### local run
 - create and configure .env file in root of project(for example see: .env.example)
